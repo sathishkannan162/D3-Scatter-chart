@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100;200;300&family=Open+Sans:wght@300&family=Poppins:wght@200;300;400&family=Raleway:wght@100;200;300;400&family=Roboto&display=swap");
+*,
+::before,
+::after {
+  box-sizing: box-border;
+  font-family: "poppins", "open sans";
+}
+
+body {
+  margin: 0;
+}
+
+#container {
+  width: 100%;
+  height: 100vh;
+  background-color: white;
+  opacity: 1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#chart {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+svg {
+  background-color: white;
+}
+
+#tooltip {
+  position: absolute;
+  width: auto;
+  height: auto;
+  transition: all 1ms ease;
+  background-color: #bcf5bc;
+  pointer-events: none;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  max-width: 200px;
+  text-align: center;
+}
+
+footer {
+  font-size: 0.8rem;
+  background-color: lightgray !important;
+}/*# sourceMappingURL=style.css.map */
