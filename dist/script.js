@@ -14,6 +14,16 @@ append("div").
 attr("id", "tooltip").
 style("opacity", "0");
 
+function sepSeconds(time) {
+  let seconds = Number(time.substring(3));
+  return seconds;
+}
+function sepMinutes(time) {
+  let minutes = Number(time.substring(0,2));
+  return minutes;
+}
+console.log(sepMinutes('37:15'));
+console.log(new Date(1999,1,1,0,sepMinutes('37:30'),sepSeconds('37:30')));
 
 fetch(
 "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json").
@@ -24,12 +34,14 @@ then(data => {
   let dataset = data.map(item => [
   item.Year,
   item.Time,
-  1000 * (item.Seconds + 30 * 60), // added 30 minutes to account for time zone difference.
+  1000 * (item.Seconds), // added 30 minutes to account for time zone difference.
   item.Name,
   item.Nationality,
-  item.Doping, new Date(1000 * (item.Seconds + 30 * 60))]);
+  item.Doping, 
+  //new Date(1000 * (item.Seconds + 30 * 60))
+  new Date(1999,1,1,0,sepMinutes(item.Time),sepSeconds(item.Time))
+]);
  
-
   const svg = d3.
   select("#chart").
   append("svg").
@@ -89,11 +101,33 @@ then(data => {
   attr("x", 815).
   attr("y", 427);
 
-  const yScale = d3.scaleUtc();
+ 
+//   legend
+//   .append('rect')
+//   .attr('x', width - 18)
+//   .attr('width', 18)
+//   .attr('height', 18)
+//   .style('fill', dotcolor);
+
+// legend
+//   .append('text')
+//   .attr('x', width - 24)
+//   .attr('y', 9)
+//   .attr('dy', '.35em')
+//   .style('text-anchor', 'end')
+//   .text(function (d) {
+//     if (d) {
+//       return 'Riders with doping allegations';
+//     } else {
+//       return 'No doping allegations';
+//     }
+  // });
+
+  const yScale = d3.scaleTime();
   let minY = new Date(d3.min(dataset, d => d[2]));
   let maxY = new Date(d3.max(dataset, d => d[2]));
  
-  yScale.domain([minY, maxY]);
+  yScale.domain(d3.extent(dataset,d=>d[6]));
 
   yScale.range([topMargin, h]);
 
@@ -110,8 +144,10 @@ then(data => {
   domain([
   d3.min(dataset, d => d[0]) - 1,
   d3.max(dataset, d => d[0]) + 1]).
-
   range([leftMargin, w]);
+
+
+
   const xAxis = d3.axisBottom(xScale);
   xAxis.tickFormat(d3.format(""));
   svg.
@@ -120,7 +156,27 @@ then(data => {
   attr("transform", "translate(0," + h + ")").
   call(xAxis);
 
-  let bars = svg.
+  let dotColor = d3.scaleOrdinal([goodColor,badColor]);
+  // let legend = svg
+  // .append('g')
+  // .attr('id','legend-container')
+  // .selectAll('.legend-color')
+  // .data(dotColor.domain())
+  // .enter()
+  // .append('g')
+  // .attr('class','color-labels')
+  // .attr('transform',(d,i)=>'translate('+0+','+ 300 -30*i +')')
+    
+  // legend
+  // .append('rect')
+  // .attr('x', 300-18)
+  // .attr('width', 18)
+  // .attr('height', 18)
+  // .attr('fill', dotColor);
+
+
+
+  let circles = svg.
   selectAll("circle").
   data(dataset).
   enter().
@@ -129,9 +185,9 @@ then(data => {
   style('opacity','0.9').
   attr("data-xvalue", d => d[0]).
   attr("data-yvalue", d => d[6]).
-  attr("fill", d => d[5] === "" ? goodColor : badColor).
+  attr('fill',d=>dotColor(d[5] === "")).
   attr("cx", d => xScale(d[0])).
-  attr("cy", d => yScale(d[2])).
+  attr("cy", d => yScale(d[6])).
   attr("r", 7).
   
   attr("stroke", "black").
@@ -158,4 +214,5 @@ then(data => {
   on("mouseout", function (event, d) {
     tooltip.style("opacity", "0");
   });
-});
+})
+.catch((error)=>{console.log(error,"hello")});
