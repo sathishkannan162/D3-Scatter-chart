@@ -44,7 +44,7 @@ svg {
   position: absolute;
   width: auto;
   height: auto;
-  transition: all 1ms ease;
+  transition: all 1s ease; //change the time to increase or decrease the duration of animation.
   background-color: $tooltip-bg;
   pointer-events: none;
   border-radius: 5px;
