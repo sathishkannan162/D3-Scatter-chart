@@ -65,7 +65,7 @@ then(data => {
   attr("cy", 400).
   attr("r", 7).
   attr("stroke", "black").
-  attr("stroke-width", 2);
+  attr("stroke-width", 1);
 
   svg.
   append("circle").
@@ -74,7 +74,7 @@ then(data => {
   attr("cy", 420).
   attr("r", 7).
   attr("stroke", "black").
-  attr("stroke-width", 2);
+  attr("stroke-width", 1);
 
   svg.
   append("text").
@@ -126,14 +126,16 @@ then(data => {
   enter().
   append("circle").
   attr("class", "dot").
+  style('opacity','0.9').
   attr("data-xvalue", d => d[0]).
   attr("data-yvalue", d => d[6]).
   attr("fill", d => d[5] === "" ? goodColor : badColor).
   attr("cx", d => xScale(d[0])).
   attr("cy", d => yScale(d[2])).
   attr("r", 7).
+  
   attr("stroke", "black").
-  attr("stroke-width", 2).
+  attr("stroke-width", 1).
   on("mouseover", function (event, d) {
 
     tooltip.
