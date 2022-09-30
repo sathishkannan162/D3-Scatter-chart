@@ -14,6 +14,16 @@ append("div").
 attr("id", "tooltip").
 style("opacity", "0");
 
+function sepSeconds(time) {
+  let seconds = Number(time.substring(3));
+  return seconds;
+}
+function sepMinutes(time) {
+  let minutes = Number(time.substring(0,2));
+  return minutes;
+}
+console.log(sepMinutes('37:15'));
+console.log(new Date(1999,1,1,0,sepMinutes('37:30'),sepSeconds('37:30')));
 
 fetch(
 "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json").
@@ -24,12 +34,13 @@ then(data => {
   let dataset = data.map(item => [
   item.Year,
   item.Time,
-  1000 * (item.Seconds + 30 * 60), // added 30 minutes to account for time zone difference.
+  1000 * (item.Seconds), 
   item.Name,
   item.Nationality,
-  item.Doping, new Date(1000 * (item.Seconds + 30 * 60))]);
+  item.Doping, 
+  new Date(1999,1,1,0,sepMinutes(item.Time),sepSeconds(item.Time))
+]);
  
-
   const svg = d3.
   select("#chart").
   append("svg").
@@ -55,45 +66,35 @@ then(data => {
   attr("y", 75).
   style("font-size", 20);
 
-  //legend
 
-  svg.
-  append("circle").
-  attr("fill", goodColor).
-  attr("id", "legend").
-  attr("cx", 800).
-  attr("cy", 400).
-  attr("r", 7).
-  attr("stroke", "black").
-  attr("stroke-width", 1);
+  // legend 
+let legendContainer = svg.append('g').attr("id", "legend")
+.attr('transform','translate(800,200)');
 
-  svg.
-  append("circle").
-  attr("fill", badColor).
-  attr("cx", 800).
-  attr("cy", 420).
-  attr("r", 7).
-  attr("stroke", "black").
-  attr("stroke-width", 1);
+legendContainer
+.selectAll('.none').data([goodColor,badColor])
+.enter().append('circle')
+.attr('cx',0).attr('cy',(d,i)=>20*i).attr('r',7)
+.attr('fill',d=>d).attr('stroke','black')
+.style('opacity','0.9');
 
-  svg.
-  append("text").
-  text("No doping allegations").
-  attr("x", 815).
-  attr("y", 405).
-  attr("font-size", 15);
+legendContainer.selectAll('.none').data([goodColor,badColor])
+.enter().append('text').text((d,i)=>i==0?'No Doping Allegations':'Riders with Doping Allegations')
+.attr('x',0).attr('y',(d,i)=>20*i)
+.attr('dx',15).attr('dy',5);
 
-  svg.
-  append("text").
-  text("Riders with doping allegations").
-  attr("x", 815).
-  attr("y", 427);
+legendContainer.append('rect').attr('width',280).attr('height',50)
+.attr('fill','transparent')
+.attr('stroke','black')
+.attr('x',-18).attr('y',-17);
 
-  const yScale = d3.scaleUtc();
+
+
+  const yScale = d3.scaleTime();
   let minY = new Date(d3.min(dataset, d => d[2]));
   let maxY = new Date(d3.max(dataset, d => d[2]));
  
-  yScale.domain([minY, maxY]);
+  yScale.domain(d3.extent(dataset,d=>d[6]));
 
   yScale.range([topMargin, h]);
 
@@ -110,8 +111,10 @@ then(data => {
   domain([
   d3.min(dataset, d => d[0]) - 1,
   d3.max(dataset, d => d[0]) + 1]).
-
   range([leftMargin, w]);
+
+
+
   const xAxis = d3.axisBottom(xScale);
   xAxis.tickFormat(d3.format(""));
   svg.
@@ -120,7 +123,9 @@ then(data => {
   attr("transform", "translate(0," + h + ")").
   call(xAxis);
 
-  let bars = svg.
+  let dotColor = d3.scaleOrdinal([goodColor,badColor]);
+
+  let circles = svg.
   selectAll("circle").
   data(dataset).
   enter().
@@ -129,9 +134,9 @@ then(data => {
   style('opacity','0.9').
   attr("data-xvalue", d => d[0]).
   attr("data-yvalue", d => d[6]).
-  attr("fill", d => d[5] === "" ? goodColor : badColor).
+  attr('fill',d=>dotColor(d[5] === "")).
   attr("cx", d => xScale(d[0])).
-  attr("cy", d => yScale(d[2])).
+  attr("cy", d => yScale(d[6])).
   attr("r", 7).
   
   attr("stroke", "black").
@@ -158,4 +163,7 @@ then(data => {
   on("mouseout", function (event, d) {
     tooltip.style("opacity", "0");
   });
-});
+
+  
+})
+.catch((error)=>{console.log(error,"hello")});
