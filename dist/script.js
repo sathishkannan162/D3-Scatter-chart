@@ -34,11 +34,10 @@ then(data => {
   let dataset = data.map(item => [
   item.Year,
   item.Time,
-  1000 * (item.Seconds), // added 30 minutes to account for time zone difference.
+  1000 * (item.Seconds), 
   item.Name,
   item.Nationality,
   item.Doping, 
-  //new Date(1000 * (item.Seconds + 30 * 60))
   new Date(1999,1,1,0,sepMinutes(item.Time),sepSeconds(item.Time))
 ]);
  
@@ -67,61 +66,29 @@ then(data => {
   attr("y", 75).
   style("font-size", 20);
 
-  //legend
 
-  svg.
-  append("circle").
-  attr("fill", goodColor).
-  attr("id", "legend").
-  attr("cx", 800).
-  attr("cy", 400).
-  attr("r", 7).
-  attr("stroke", "black").
-  attr("stroke-width", 1);
+  // legend 
+let legendContainer = svg.append('g').attr("id", "legend")
+.attr('transform','translate(800,200)');
 
-  svg.
-  append("circle").
-  attr("fill", badColor).
-  attr("cx", 800).
-  attr("cy", 420).
-  attr("r", 7).
-  attr("stroke", "black").
-  attr("stroke-width", 1);
+legendContainer
+.selectAll('.none').data([goodColor,badColor])
+.enter().append('circle')
+.attr('cx',0).attr('cy',(d,i)=>20*i).attr('r',7)
+.attr('fill',d=>d).attr('stroke','black')
+.style('opacity','0.9');
 
-  svg.
-  append("text").
-  text("No doping allegations").
-  attr("x", 815).
-  attr("y", 405).
-  attr("font-size", 15);
+legendContainer.selectAll('.none').data([goodColor,badColor])
+.enter().append('text').text((d,i)=>i==0?'No Doping Allegations':'Riders with Doping Allegations')
+.attr('x',0).attr('y',(d,i)=>20*i)
+.attr('dx',15).attr('dy',5);
 
-  svg.
-  append("text").
-  text("Riders with doping allegations").
-  attr("x", 815).
-  attr("y", 427);
+legendContainer.append('rect').attr('width',280).attr('height',50)
+.attr('fill','transparent')
+.attr('stroke','black')
+.attr('x',-18).attr('y',-17);
 
- 
-//   legend
-//   .append('rect')
-//   .attr('x', width - 18)
-//   .attr('width', 18)
-//   .attr('height', 18)
-//   .style('fill', dotcolor);
 
-// legend
-//   .append('text')
-//   .attr('x', width - 24)
-//   .attr('y', 9)
-//   .attr('dy', '.35em')
-//   .style('text-anchor', 'end')
-//   .text(function (d) {
-//     if (d) {
-//       return 'Riders with doping allegations';
-//     } else {
-//       return 'No doping allegations';
-//     }
-  // });
 
   const yScale = d3.scaleTime();
   let minY = new Date(d3.min(dataset, d => d[2]));
@@ -157,24 +124,6 @@ then(data => {
   call(xAxis);
 
   let dotColor = d3.scaleOrdinal([goodColor,badColor]);
-  // let legend = svg
-  // .append('g')
-  // .attr('id','legend-container')
-  // .selectAll('.legend-color')
-  // .data(dotColor.domain())
-  // .enter()
-  // .append('g')
-  // .attr('class','color-labels')
-  // .attr('transform',(d,i)=>'translate('+0+','+ 300 -30*i +')')
-    
-  // legend
-  // .append('rect')
-  // .attr('x', 300-18)
-  // .attr('width', 18)
-  // .attr('height', 18)
-  // .attr('fill', dotColor);
-
-
 
   let circles = svg.
   selectAll("circle").
@@ -214,5 +163,7 @@ then(data => {
   on("mouseout", function (event, d) {
     tooltip.style("opacity", "0");
   });
+
+  
 })
 .catch((error)=>{console.log(error,"hello")});
